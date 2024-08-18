@@ -10,6 +10,8 @@ A slow query log analyzer tool based on llm.
 - [ ] Loki Integration
 
 
-🤝 Thanks
+# 🤝 Thanks
 This tool is built with the help of the following projects:
 - [ollama](https://github.com/ollama/ollama)
+- [bubbletea](https://github.com/charmbracelet/bubbletea)
+- [cobra](github.com/spf13/cobra)

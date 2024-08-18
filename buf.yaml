@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: api
+    name: github.com/catundercar/insights
+  - path: third_party
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

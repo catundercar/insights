@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb/mongo:/var/lib/mongo
+      - ./mongod.conf:/etc/mongod.conf
+      - ./log:/var/log/mongodb
+    command:
+      - "mongod"
+      - "-f"
+      - "/etc/mongod.conf"

@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/longrunning/operations.proto";
+
+option go_package = "github.com/catundercar/insights;insights_v1";
+
+package insights.v1;
+
+message SlowQueryLog {
+  // content is the raw log content.
+  string content = 1;
+
+  // database is the database type.
+  enum database_type {
+    UNKNOWN     = 0;
+    MYSQL       = 1;
+    POSTGRESQL  = 2;
+    MONGODB     = 3;
+  }
+  database_type database = 2;
+}
+
+service SlowQueryInsights {
+  // Explain analyzes a slow query log.
+  rpc Explain(ExplainRequest) returns (stream ExplainResponse) {
+    option (google.api.http) = {
+      post: "/insights/v1/slowquery:explain"
+      body: "*"
+    };
+  };
+
+  // CreateExplainOperation creates a long-running operation that analyzes a slow query log.
+  rpc CreateExplainOperation(ExplainRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/insights/v1/slowquery:createExplainOperation"
+      body: "*"
+    };
+    option (google.longrunning.operation_info) = {
+      response_type: "ExplainResponse"
+    };
+  }
+}
+
+message ExplainRequest {
+  // log is the slow query log.
+  SlowQueryLog log = 1;
+}
+
+message ExplainResponse {
+  // content is the explain result.
+  string content = 1;
+}

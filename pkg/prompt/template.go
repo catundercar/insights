@@ -1,6 +1,6 @@
 package prompt
 
-const promptTemplate = `Please analyze the following slow query log from {{.DatabaseName}} database and provide a detailed problem diagnosis and optimization suggestions. Use {{.Language}} and strictly follow this format for your analysis output:
+const promptTemplate = `Please analyze the following slow query log from {{.DatabaseName}} database and provide a detailed problem diagnosis and optimization suggestions. Strictly follow this format for your analysis output:
 
 ## 1. Query Overview
 [Briefly describe the purpose and main operations of the query]
@@ -34,6 +34,7 @@ const promptTemplate = `Please analyze the following slow query log from {{.Data
 [Provide any other suggestions or observations that might help improve overall database performance]
 
 Please ensure your analysis is comprehensive, accurate, and provides actionable specific recommendations.
+Please answer by using the language: Chinese.
 
 Slow Query Log:
 {{.SlowQueryLog}}`

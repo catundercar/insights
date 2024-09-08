@@ -17,3 +17,7 @@ func TestGenPrompt(t *testing.T) {
 	}
 	fmt.Println("prompt:", prompt)
 }
+
+func Test_getSystemLanguage(t *testing.T) {
+	fmt.Println(getSystemLanguage())
+}

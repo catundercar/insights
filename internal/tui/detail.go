@@ -1,17 +1,20 @@
 package tui
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"io"
 	"time"
 )
 
 type detailModel struct {
 	sub     chan tea.Msg // where we'll receive activity notifications
-	content string
+	content bytes.Buffer
 	i       item
 
 	stop    chan struct{}
@@ -19,13 +22,13 @@ type detailModel struct {
 	back    tea.Model
 }
 
-func newDetailModel(sub chan tea.Msg, back tea.Model, i item) *detailModel {
+func newDetailModel(back tea.Model, i item) *detailModel {
 	s := spinner.New()
 	s.Spinner = spinner.Line
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
 	m := &detailModel{
-		sub:     sub,
+		sub:     make(chan tea.Msg, 1),
 		i:       i,
 		spinner: s,
 		back:    back,
@@ -47,27 +50,37 @@ func (m *detailModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		close(m.stop)
 		return m.back, nil
 	case string:
-		m.content += v                   // record external activity
+		m.content.WriteString(v)         // record external activity
 		return m, waitForActivity(m.sub) // wait for next event
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
+	case error:
+		if !errors.Is(v, io.EOF) {
+			m.content.WriteString(v.Error())
+		}
+		// TODO: render spinner stopped.
+		return m, nil
 	default:
 		return m, nil
 	}
 }
 
 func (m *detailModel) View() string {
-	s := fmt.Sprintf("\n %s Analyze Slow Query: %s\n received: %s\n\n Press any key to return\n",
-		m.spinner.View(), m.i.Query(), m.content)
+	s := fmt.Sprintf(`
+Analyze Slow Query:
+%s
+%s Received:
+%s
+
+Press any key to return`,
+		m.i.Query(), m.spinner.View(), m.content.String())
 	return s
 }
 
 func (m *detailModel) listenForHandler(handler Handler) tea.Cmd {
 	return func() tea.Msg {
-		// todo：request ollama.
-
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -75,6 +88,7 @@ func (m *detailModel) listenForHandler(handler Handler) tea.Cmd {
 		for {
 			select {
 			case <-m.stop:
+				close(m.sub)
 				return ""
 			case msg := <-recv:
 				m.sub <- msg

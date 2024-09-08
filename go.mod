@@ -1,6 +1,8 @@
 module insights
 
-go 1.22
+go 1.22.5
+
+toolchain go1.23.0
 
 require (
 	cloud.google.com/go/longrunning v0.5.12
@@ -8,7 +10,9 @@ require (
 	github.com/charmbracelet/bubbletea v0.27.0
 	github.com/charmbracelet/lipgloss v0.12.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
+	github.com/ollama/ollama v0.3.7
 	github.com/spf13/cobra v1.8.1
+	golang.org/x/text v0.16.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
@@ -38,6 +42,5 @@ require (
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
 )

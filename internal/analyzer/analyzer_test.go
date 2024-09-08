@@ -1,12 +1,11 @@
-package tui
+package analyzer
 
 import (
 	"context"
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
 	"insights"
+	"insights/internal/tui"
 	"testing"
-	"time"
 )
 
 type message struct {
@@ -30,7 +29,7 @@ func (m message) Frequency() int {
 	return m.frequency
 }
 
-func TestRender(t *testing.T) {
+func TestNewAnalyzer(t *testing.T) {
 	messages := []insights.LogMessage{
 		message{
 			query:     "SELECT count(*) FROM users",
@@ -49,23 +48,22 @@ func TestRender(t *testing.T) {
 			frequency: 3,
 		},
 	}
-	m := NewModel(func(ctx context.Context, log insights.LogMessage) <-chan tea.Msg {
-		ch := make(chan tea.Msg, 1)
-		ch <- fmt.Sprintf("log: %s, Frequency: %d", log.Query(), log.Frequency())
-		go func() {
-			tk := time.NewTicker(300 * time.Millisecond)
-			for {
-				select {
-				case <-tk.C:
-					ch <- "test "
-				case <-ctx.Done():
-					tk.Stop()
-					close(ch)
-					return
-				}
-			}
-		}()
-		return ch
-	})
+
+	analyzer, err := NewAnalyzer(Config{ApiServer: "http://127.0.0.1:11434"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := tui.NewModel(analyzer.HandleCompletion)
 	m.Render(messages)
+}
+
+func TestAnalyzer_HandleCompletion(t *testing.T) {
+	analyzer, err := NewAnalyzer(Config{ApiServer: "http://127.0.0.1:11434"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ch := analyzer.HandleCompletion(context.TODO(), message{query: "SELECT * FROM users WHERE id = 1"})
+	for v := range ch {
+		fmt.Print(v)
+	}
 }

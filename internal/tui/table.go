@@ -20,7 +20,7 @@ type item struct {
 func (i item) Title() string { return i.Query() }
 
 func (i item) Description() string {
-	return i.Message() + fmt.Sprintf(" frequency: %d", i.Frequency())
+	return fmt.Sprintf("%s frequency: %d", i.Message(), i.Frequency())
 }
 
 func (i item) FilterValue() string { return i.Message() }
@@ -28,14 +28,12 @@ func (i item) FilterValue() string { return i.Message() }
 type Handler func(ctx context.Context, log insights.LogMessage) <-chan tea.Msg
 
 type Model struct {
-	sub     chan tea.Msg
 	list    list.Model
 	handler Handler
 }
 
 func NewModel(fn Handler) *Model {
 	m := &Model{
-		sub:     make(chan tea.Msg),
 		handler: fn,
 	}
 	return m
@@ -55,7 +53,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				dm := newDetailModel(m.sub, m, i)
+				dm := newDetailModel(m, i)
 				return dm, tea.Batch(dm.Init(), dm.listenForHandler(m.handler))
 			}
 			return m, tea.Quit

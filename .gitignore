@@ -26,3 +26,4 @@ go.work.sum
 /examples/mongodb/mongodb/
 /examples/mongodb/log/
 /.idea
+internal/.DS_Store

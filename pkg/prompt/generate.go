@@ -3,6 +3,8 @@ package prompt
 import (
 	"bytes"
 	"fmt"
+	"golang.org/x/text/language"
+	"os"
 	"text/template"
 )
 
@@ -13,6 +15,14 @@ type PromptData struct {
 	SlowQueryLog string
 	// Language is the language of result.
 	Language string
+}
+
+func NewPromptData(database, content string) PromptData {
+	return PromptData{
+		DatabaseName: database,
+		SlowQueryLog: content,
+		Language:     getSystemLanguage(),
+	}
 }
 
 func GenPrompt(data PromptData) (string, error) {
@@ -31,4 +41,19 @@ func GenPrompt(data PromptData) (string, error) {
 		return "", err
 	}
 	return prompt.String(), nil
+}
+
+func getSystemLanguage() string {
+	lang := os.Getenv("LANG")
+	if lang == "" {
+		lang = os.Getenv("LC_ALL")
+	}
+	if lang == "" {
+		lang = os.Getenv("LANGUAGE")
+	}
+	tag, err := language.Parse(lang)
+	if err != nil {
+		return "zh-CN"
+	}
+	return tag.String()
 }
